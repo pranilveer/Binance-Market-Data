@@ -1,3 +1,137 @@
 .App {
   text-align: center;
 }
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+canvas {
+  width: 100vw;
+  height: 400px;
+  margin: 10vh auto;
+}
+
+.dropdown {
+  margin: 10px;
+}
+
+::-webkit-scrollbar {display:none;}
+
+/* General body and layout styling */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f9;
+  color: #333;
+}
+
+/* Container for the entire app */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Styling for controls (dropdowns) */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.controls label {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #555;
+}
+
+select {
+  padding: 8px 12px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+select:hover {
+  border-color: #007BFF;
+}
+
+/* Responsive canvas chart */
+canvas {
+  width: 100% !important;
+  max-width: 1000px;
+  height: auto !important;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styling */
+button {
+  padding: 10px 20px;
+  background-color: #007BFF;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive styling for mobile devices */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  canvas {
+    max-width: 90vw;
+  }
+}
+
+/* Styling for the dropdown options */
+.dropdown {
+  position: relative;
+}
+
+.dropdown select {
+  min-width: 180px;
+}
+
+.dropdown-label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Chart container to improve spacing */
+.chart-container {
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
