@@ -3,7 +3,7 @@ import Chart from 'chart.js/auto';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import 'chartjs-adapter-date-fns';
 import Dropdown from './Dropdown';
-import "../App.css"
+import "../App.css";
 
 Chart.register(CandlestickController, CandlestickElement);
 
@@ -15,9 +15,12 @@ const CryptoChart = () => {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
+    // Load saved data from localStorage
     const savedData = localStorage.getItem(symbol);
     if (savedData) {
-      setChartData(JSON.parse(savedData));
+      const parsedData = JSON.parse(savedData);
+      console.log('Loaded data from localStorage:', parsedData);
+      setChartData(parsedData);
     }
 
     connectWebSocket(symbol, interval);
@@ -37,22 +40,31 @@ const CryptoChart = () => {
     const socketUrl = `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`;
     ws.current = new WebSocket(socketUrl);
 
+    ws.current.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const candlestick = data.k;
-      const newCandle = {
-        x: new Date(candlestick.t),
-        o: parseFloat(candlestick.o),
-        h: parseFloat(candlestick.h),
-        l: parseFloat(candlestick.l),
-        c: parseFloat(candlestick.c),
-      };
 
-      setChartData((prevData) => {
-        const updatedData = [...prevData, newCandle];
-        localStorage.setItem(symbol, JSON.stringify(updatedData));
-        return updatedData;
-      });
+      // Only process the candlestick if it's closed
+      if (candlestick.x) {
+        const newCandle = {
+          x: new Date(candlestick.t),
+          o: parseFloat(candlestick.o),
+          h: parseFloat(candlestick.h),
+          l: parseFloat(candlestick.l),
+          c: parseFloat(candlestick.c),
+        };
+
+        console.log('New candle received:', newCandle);
+        setChartData((prevData) => {
+          const updatedData = [...prevData, newCandle];
+          localStorage.setItem(symbol, JSON.stringify(updatedData));
+          return updatedData;
+        });
+      }
     };
 
     ws.current.onerror = (error) => {
@@ -61,6 +73,7 @@ const CryptoChart = () => {
 
     ws.current.onclose = (event) => {
       console.log('WebSocket closed:', event);
+      setTimeout(() => connectWebSocket(symbol, interval), 5000); // Retry connection after 5 seconds
     };
   };
 
@@ -68,34 +81,52 @@ const CryptoChart = () => {
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
 
+      // Update or initialize the chart instance
       if (chartRef.current.chartInstance) {
-        chartRef.current.chartInstance.destroy();
-      }
-
-      chartRef.current.chartInstance = new Chart(ctx, {
-        type: 'candlestick',
-        data: {
-          datasets: [{
-            label: 'Candlestick Chart',
-            data: chartData,
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              type: 'time',
-              time: {
-                unit: 'minute',
+        chartRef.current.chartInstance.data.datasets[0].data = chartData; // Update the dataset
+        chartRef.current.chartInstance.update(); // Refresh the chart
+      } else {
+        chartRef.current.chartInstance = new Chart(ctx, {
+          type: 'candlestick',
+          data: {
+            datasets: [{
+              label: 'Candlestick Chart',
+              data: chartData,
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute', // Change to 'hour' or 'day' for larger time frames
+                  displayFormats: {
+                    minute: 'HH:mm', // Display format for minutes
+                    hour: 'MMM D, HH:mm', // Display format for hours
+                  }
+                },
+                title: {
+                  display: true,
+                  text: 'Time', // Label for x-axis
+                },
+                ticks: {
+                  autoSkip: true, // Skip ticks automatically if they're too crowded
+                  maxTicksLimit: 20, // Limit the number of ticks
+                },
+                barPercentage: 0.3, // Adjust candlestick width
+                categoryPercentage: 0.3, // Adjust spacing between candlesticks
               },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Price (USDT)', // Label for y-axis
+                },
+              }
             }
           }
-        }
-      });
-
-      return () => {
-        chartRef.current.chartInstance.destroy();
-      };
+        });
+      }
     }
   }, [chartData]);
 
@@ -123,7 +154,7 @@ const CryptoChart = () => {
           onChange={setInterval}
         />
       </div>
-      <canvas ref={chartRef} id="myChart"></canvas>
+      <canvas ref={chartRef} id="myChart" width="800" height="400"></canvas> {/* Set canvas width and height */}
     </div>
   );
 };

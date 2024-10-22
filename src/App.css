@@ -12,6 +12,7 @@ canvas {
   width: 100vw;
   height: 400px;
   margin: 10vh auto;
+  background-color: #ffffff;
 }
 
 .dropdown {
